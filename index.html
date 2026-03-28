@@ -1,0 +1,459 @@
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Murad Timeline ✨ | Fantasy Planet Voyage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ===== FANTASY PLANET ABSTRACT LANDSCAPE THEME ===== */
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at 10% 20%, #1b2b3f, #0f1a24, #0a1117);
+            color: #f0f3fa;
+            overflow-x: hidden;
+            cursor: none; /* Custom cursor */
+            position: relative;
+        }
+        
+        /* Animated vector-like cosmic landscape + planets */
+        .planet-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            pointer-events: none;
+            background: 
+                /* floating orbs / planets */
+                radial-gradient(circle at 15% 70%, rgba(210, 180, 140, 0.25) 0%, rgba(210, 180, 140, 0) 35%),
+                radial-gradient(circle at 85% 25%, rgba(100, 210, 210, 0.2) 0%, rgba(100, 210, 210, 0) 45%),
+                radial-gradient(circle at 45% 85%, rgba(240, 170, 100, 0.2) 0%, rgba(240, 170, 100, 0) 40%),
+                radial-gradient(circle at 70% 60%, rgba(180, 130, 255, 0.18) 0%, rgba(180, 130, 255, 0) 50%),
+                repeating-linear-gradient(45deg, rgba(255,255,200,0.02) 0px, rgba(255,255,200,0.02) 2px, transparent 2px, transparent 8px);
+        }
+        
+        /* Abstract floating geometric / planet rings */
+        .planet-ring {
+            position: fixed;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 215, 140, 0.2);
+            box-shadow: 0 0 25px rgba(255, 200, 100, 0.1);
+            pointer-events: none;
+            z-index: -1;
+            backdrop-filter: blur(1px);
+        }
+        
+        /* moving dust / stars */
+        .star-particle {
+            position: fixed;
+            background: rgba(255, 245, 200, 0.7);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            box-shadow: 0 0 4px #ffecb3;
+        }
+        
+        /* Custom Cursor */
+        #custom-cursor {
+            position: fixed; top: 0; left: 0; width: 30px; height: 30px; 
+            background: radial-gradient(circle, #ffdd99, #ffaa66);
+            border-radius: 50%; 
+            pointer-events: none; z-index: 9999; mix-blend-mode: screen;
+            transform: translate(-50%, -50%); transition: transform 0.1s ease;
+            box-shadow: 0 0 20px #ffbb77, 0 0 8px #ffcc88;
+            opacity: 0;
+            display: none;
+        }
+        
+        /* timeline line with celestial look */
+        .timeline-line {
+            position: absolute; left: 50%; top: 0; bottom: 0; width: 6px;
+            background: linear-gradient(to bottom, #ffe6b3, #ffb347, #c7a56b, #ffb347, #ffe6b3);
+            transform: translateX(-50%); border-radius: 10px; z-index: 0;
+            box-shadow: 0 0 12px rgba(255, 180, 80, 0.6);
+        }
+        
+        /* Glassmorphic cards with fantasy vibe */
+        .timeline-card {
+            background: rgba(25, 30, 45, 0.65);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 215, 150, 0.3);
+            border-radius: 28px;
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+        
+        .timeline-card:hover {
+            transform: translateY(-6px) scale(1.01);
+            box-shadow: 0 20px 40px rgba(255, 160, 60, 0.25);
+            border-color: rgba(255, 200, 100, 0.7);
+        }
+        
+        .img-thumb {
+            transition: all 0.3s ease; cursor: pointer;
+            border-radius: 16px; border: 2px solid rgba(255, 215, 120, 0.4);
+        }
+        .img-thumb:hover {
+            transform: scale(1.08) rotate(1deg); z-index: 10;
+            border-color: #ffcc77; box-shadow: 0 0 20px #ffbb55;
+        }
+        
+        /* Lightbox starry */
+        #lightbox {
+            backdrop-filter: blur(20px);
+            background: rgba(10, 15, 25, 0.92);
+            transition: opacity 0.3s ease;
+        }
+        #lightbox img {
+            animation: floatGlow 0.5s ease-out;
+            box-shadow: 0 0 50px rgba(255, 200, 100, 0.5);
+            border-radius: 20px;
+        }
+        
+        @keyframes floatGlow {
+            0% { transform: scale(0.92); opacity: 0; filter: blur(4px);}
+            100% { transform: scale(1); opacity: 1; filter: blur(0);}
+        }
+        
+        /* Progress Bar */
+        #progress-bar-container {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 8px; background: rgba(0,0,0,0.5); z-index: 1000;
+        }
+        #progress-bar {
+            height: 100%; background: linear-gradient(90deg, #ffc857, #ff9f4a, #ffbd7f); width: 0%;
+            box-shadow: 0 0 8px #ffae5a;
+        }
+        #progress-indicator {
+            position: absolute; top: -32px; right: 0; transform: translateX(50%);
+            background: #2c2418; color: #ffdd99; padding: 4px 12px; border-radius: 40px; font-weight: bold; font-size: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); white-space: nowrap;
+            border: 1px solid #ffc285;
+        }
+        
+        /* Loading screen: fantasy planet portal */
+        #loader {
+            position: fixed; inset: 0; background: radial-gradient(ellipse at 30% 40%, #1f3448, #0a111f);
+            z-index: 10000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: auto !important;
+            backdrop-filter: blur(3px);
+        }
+        .loader-planet {
+            width: 110px;
+            height: 110px;
+            background: radial-gradient(circle at 35% 35%, #f5bc70, #c9853e);
+            border-radius: 50%;
+            box-shadow: 0 0 35px #ffb562, 0 0 15px #ffbc6e;
+            position: relative;
+            animation: planetSpin 3s infinite ease-in-out;
+            margin-bottom: 28px;
+        }
+        .loader-planet::before {
+            content: "";
+            position: absolute;
+            width: 140px;
+            height: 28px;
+            background: rgba(210, 170, 80, 0.4);
+            border-radius: 50%;
+            top: 50%;
+            left: -15px;
+            filter: blur(8px);
+            transform: rotateX(70deg);
+        }
+        .loader-ring {
+            position: absolute;
+            width: 150px;
+            height: 40px;
+            border: 3px solid rgba(255, 210, 110, 0.7);
+            border-radius: 50%;
+            top: 30px;
+            left: -20px;
+            transform: rotateX(70deg) rotateZ(15deg);
+            box-shadow: 0 0 12px #ffbb66;
+        }
+        @keyframes planetSpin {
+            0% { transform: rotate(0deg) scale(1);}
+            50% { transform: rotate(8deg) scale(1.03);}
+            100% { transform: rotate(0deg) scale(1);}
+        }
+        
+        .loader-text {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #ffe1a0, #ffbc6c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        
+        @media (max-width: 768px) {
+            .timeline-line { left: 30px; }
+            .timeline-row { flex-direction: column !important; align-items: flex-end; }
+            .timeline-content { width: calc(100% - 60px) !important; margin-left: auto; }
+            .timeline-dot { left: 30px !important; }
+            body { cursor: auto; }
+            #custom-cursor { display: none; }
+        }
+        
+        /* scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #121e28; }
+        ::-webkit-scrollbar-thumb { background: #ffaa55; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- dynamic fantasy background layers -->
+    <div class="planet-bg"></div>
+    <div id="floating-rings"></div>
+    <div id="star-particles"></div>
+
+    <div id="loader">
+        <div class="loader-planet">
+            <div class="loader-ring"></div>
+        </div>
+        <h2 class="loader-text text-3xl font-bold mt-4">✦ MURAD's COSMIC TIMELINE ✦</h2>
+        <p class="text-amber-200/80 mt-2 text-lg">Embark on a fantasy voyage</p>
+        <button id="start-btn" class="mt-8 px-8 py-3 bg-gradient-to-r from-amber-600 to-orange-500 rounded-full text-xl font-bold hover:scale-110 transition-transform shadow-[0_0_20px_rgba(255,160,60,0.7)] text-white">
+            Launch Journey 🚀
+        </button>
+    </div>
+
+    <div id="custom-cursor"></div>
+
+    <audio id="bg-music" loop>
+        <source src="https://raw.githubusercontent.com/MuradMonoarul/mybgscore/main/Flute.mp3" type="audio/mpeg">
+    </audio>
+
+    <nav class="fixed top-0 w-full p-4 z-50 flex justify-between items-center bg-gradient-to-b from-black/50 to-transparent backdrop-blur-sm">
+        <select id="year-select" class="bg-amber-900/60 text-amber-100 font-bold py-2 px-5 rounded-full outline-none cursor-pointer shadow-lg hover:bg-amber-800/70 transition border border-amber-400/40">
+            <option value="" class="bg-stone-800">📅 Jump to Year</option>
+        </select>
+        <button id="music-toggle" class="bg-white/10 hover:bg-amber-500/40 p-3 rounded-full backdrop-blur-md transition-all border border-amber-300/30">
+            <i class="fas fa-volume-up text-xl text-amber-300"></i>
+        </button>
+    </nav>
+
+    <header class="min-h-screen flex flex-col items-center justify-center text-center p-6 pt-24 relative z-10">
+        <h1 class="text-6xl md:text-8xl font-black mb-4 tracking-tighter drop-shadow-[0_5px_15px_rgba(0,0,0,0.7)]" style="text-shadow: 3px 3px 0px #c97e2a;">
+            MONOARUL MURAD
+        </h1>
+        <div class="max-w-3xl bg-black/40 p-8 rounded-3xl border border-amber-400/30 backdrop-blur-lg shadow-2xl mt-8">
+            <p class="text-lg md:text-xl leading-relaxed text-gray-200 font-medium text-left">
+                Hey! This is MURAD here 🤖<br><br>
+                Meet Monoarul Islam Murad, famously known as MURAD ⚡—a Sociology student at Jagannath University, Dhaka 🏛️. As a true Ambivert 🌓, I’m the guy who can discuss social theories in class but will probably choose to hang out with my favorite books 📚 or a coding project 💻 at home. <br><br>
+                I’m a passionate Cook 🍳 (self-proclaimed MasterChef!), a dedicated Movie Buff 🎬, and someone who still finds pure joy in watching cartoons—especially the legendary Shinchan 👦🏻🍑. When I'm not overthinking society or debugging code, you’ll find me either Traveling 🌍 to explore new horizons or deep in my favorite hobby: Sleeping 😴. I live by a simple rule—if life gets too complicated, just act like Shinchan and keep it cool! ✌️✨
+            </p>
+            
+            <div class="flex justify-center gap-6 mt-8 flex-wrap">
+                <a href="mailto:monoarulmurad@gmail.com" class="text-3xl hover:text-amber-400 hover:scale-125 transition-all"><i class="fas fa-envelope"></i></a>
+                <a href="https://wa.me/8801773350146" target="_blank" class="text-3xl hover:text-green-400 hover:scale-125 transition-all"><i class="fab fa-whatsapp"></i></a>
+                <a href="https://www.facebook.com/muradmonoarul/" target="_blank" class="text-3xl hover:text-blue-400 hover:scale-125 transition-all"><i class="fab fa-facebook"></i></a>
+                <a href="https://www.instagram.com/murad.mp4/" target="_blank" class="text-3xl hover:text-pink-400 hover:scale-125 transition-all"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.linkedin.com/in/monoarulmurad/" target="_blank" class="text-3xl hover:text-blue-300 hover:scale-125 transition-all"><i class="fab fa-linkedin"></i></a>
+                <a href="https://www.youtube.com/@MuradMonoarul" target="_blank" class="text-3xl hover:text-red-500 hover:scale-125 transition-all"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+        <div class="mt-16 animate-bounce">
+            <p class="mb-2 text-sm text-amber-300 uppercase tracking-widest">Scroll to explore galaxy</p>
+            <i class="fas fa-chevron-down text-3xl text-amber-400"></i>
+        </div>
+    </header>
+
+    <section class="relative max-w-6xl mx-auto py-20 px-4 z-10" id="timeline-container">
+        <div class="timeline-line hidden md:block"></div>
+    </section>
+
+    <footer class="py-20 text-center relative z-10 bg-gradient-to-t from-black/70 to-transparent">
+        <h2 class="text-4xl font-bold italic mb-6 text-amber-300">"Still writing my story..." ✍️</h2>
+        <p class="text-gray-300 mb-8">Feel free to reach out & connect!</p>
+        <button onclick="window.scrollTo(0,0)" class="bg-white/10 hover:bg-amber-600/50 px-6 py-2 rounded-full backdrop-blur-md transition-all flex items-center gap-2 mx-auto border border-amber-400/40">
+            <i class="fas fa-arrow-up"></i> Back to Top
+        </button>
+        <p class="mt-12 text-sm text-gray-400">© 2026 Monoarul Islam Murad — Cosmic Chronicles</p>
+    </footer>
+
+    <div id="lightbox" class="fixed inset-0 z-[60] bg-black/85 hidden flex justify-center items-center p-4">
+        <button id="close-lightbox" class="absolute top-6 right-6 text-white text-5xl hover:text-amber-400 transition-colors z-[70]"><i class="fas fa-times-circle"></i></button>
+        <img id="lightbox-img" src="" alt="Full view" class="w-auto max-w-[85vw] max-h-[85vh] object-contain rounded-xl border-4 border-amber-400/50 shadow-2xl">
+    </div>
+
+    <div id="progress-bar-container">
+        <div id="progress-bar">
+            <div id="progress-indicator">✨ Start</div>
+        </div>
+    </div>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+        
+        // ========== FANTASY PLANET EFFECTS ==========
+        function createPlanetArtifacts() {
+            const ringsDiv = document.getElementById('floating-rings');
+            for(let i=0; i<6; i++) {
+                let ring = document.createElement('div');
+                ring.classList.add('planet-ring');
+                let size = Math.random() * 180 + 80;
+                ring.style.width = size + 'px';
+                ring.style.height = size + 'px';
+                ring.style.left = Math.random() * 90 + '%';
+                ring.style.top = Math.random() * 90 + '%';
+                ring.style.borderWidth = Math.floor(Math.random() * 3) + 1 + 'px';
+                ring.style.opacity = Math.random() * 0.3 + 0.1;
+                ring.style.animation = `floatRing ${Math.random() * 20 + 15}s infinite alternate ease-in-out`;
+                ringsDiv.appendChild(ring);
+            }
+            const styleSheet = document.createElement("style");
+            styleSheet.textContent = `@keyframes floatRing { 0% { transform: translateY(0px) rotate(0deg); } 100% { transform: translateY(30px) rotate(8deg); } }`;
+            document.head.appendChild(styleSheet);
+            
+            // stars
+            const starContainer = document.getElementById('star-particles');
+            for(let i=0;i<120;i++) {
+                let star = document.createElement('div');
+                star.classList.add('star-particle');
+                let wh = Math.random() * 3 + 1;
+                star.style.width = wh+'px';
+                star.style.height = wh+'px';
+                star.style.left = Math.random()*100+'%';
+                star.style.top = Math.random()*100+'%';
+                star.style.opacity = Math.random() * 0.7 + 0.2;
+                star.style.animation = `twinkle ${Math.random()*4+2}s infinite alternate`;
+                starContainer.appendChild(star);
+            }
+            const twinkleAnim = document.createElement('style');
+            twinkleAnim.textContent = `@keyframes twinkle { 0% { opacity: 0.2; } 100% { opacity: 0.9; } }`;
+            document.head.appendChild(twinkleAnim);
+        }
+        createPlanetArtifacts();
+        
+        // Timeline Data (same as before but with fantasy vibe)
+        const timelineData = [
+            { year: "2006-2014", quote: "Childhood is a short season, enjoy the mystery. ✨", text: "I Don't have those picture in my device 🐎", images: [] },
+            { year: 2015, quote: "Every journey begins with a single step.", images: ["https://drive.google.com/thumbnail?id=12IkQpq2Yh5fJpEKutxVdckb20l5Cl1dl"] },
+            { year: 2016, quote: "Got my First Phone. 🌱", images: ["https://drive.google.com/thumbnail?id=1KSH3uxbDFpK3tLKfqa4PxpgraoRUdCqL", "https://drive.google.com/thumbnail?id=16kDM1hEZDZF2aZlQ53X-HmzLkGfHldop", "https://drive.google.com/thumbnail?id=1iN9R5NO9TYYICYs4RF_arTmDisrG_6Cs", "https://drive.google.com/thumbnail?id=1iI6m7vQ1ELrapiXrQKrNUcDF6paA79FM", "https://drive.google.com/thumbnail?id=1oHEhmNsI0i4_FRnEaUDbtcGCNUIe9DK9", "https://drive.google.com/thumbnail?id=1tfbRFRGfRGXRpkEjFfpTxXFnWAVyYmp9"] },
+            { year: 2017, quote: "This is the PSC Exam year & Got my new Samsung Tablet. 📚", images: ["https://drive.google.com/thumbnail?id=1K6XBatC9HZdt_J8mpLRC7bK5gQA0_PI-", "https://drive.google.com/thumbnail?id=14QFM6lhHNoL3lVHBWHaunD4YM-imUd9V", "https://drive.google.com/thumbnail?id=1fylnh2UY2VIJW95QWixSCYR9VWtZ3ahc", "https://drive.google.com/thumbnail?id=1Q3z7Owb3xs7N482X0F-pLRlWyCfexnft", "https://drive.google.com/thumbnail?id=1JJmsLJQ_FKpqxuAZ0dlO1aO-HqEWbc8f", "https://drive.google.com/thumbnail?id=1ZaDyv35tnioBSNWH5lXno7jtYallQv4S"] },
+            { year: 2018, quote: "Collect moments, not things. 📸", images: ["https://drive.google.com/thumbnail?id=16nUoDHx48YT0H7E4kSE287jCqUx5kxoO", "https://drive.google.com/thumbnail?id=1IQcNufL5PAPNdS1Ygw6wtvsBMAnDDOS0", "https://drive.google.com/thumbnail?id=1l5HFKSO6Jjajw-T3YUFtwwhtHfOw0JNZ", "https://drive.google.com/thumbnail?id=1tDula9aR5br0tnU1hQow4F9xLgAj4lIm", "https://drive.google.com/thumbnail?id=1foCxlEJ9PPZoehcXUNAIj6idrMDyiIPX", "https://drive.google.com/thumbnail?id=1GguPGvtxlsF93eeRXNi0cjb6ka5k-7eT", "https://drive.google.com/thumbnail?id=1kSx1x7EsZUZus6qQteJsXsfP7OCB_SFa", "https://drive.google.com/thumbnail?id=18-GlP7RbcZ5M3hbsRE3vsQclVejZoiXl"] },
+            { year: 2019, quote: "Far from home. 🎭", images: ["https://drive.google.com/thumbnail?id=1KfKkkYm81ZnrUYWvTHNxfWaPk_EqzNFB"] },
+            { year: 2020, quote: "Tough times never last, Corona Time. 🌟", images: ["https://drive.google.com/thumbnail?id=1Jz3cd_wxXYNxX71Cu6vy9sN1Phaka-y6", "https://drive.google.com/thumbnail?id=1RLBg_WeHs1zU69gtUGTIyMkk3W7KRKFt", "https://drive.google.com/thumbnail?id=1AUiL8556Xcez8AA_tktOwbIIXpu93uaP", "https://drive.google.com/thumbnail?id=1JnH3R15FDIzY5XuYNmTYjVkdwOMaad_G", "https://drive.google.com/thumbnail?id=1oEpMoCtrjawO15Atc8YoZJ9cqV_DL2in", "https://drive.google.com/thumbnail?id=1tm01uPraaBuBlU6thB9kIE1UjL3rc8tn", "https://drive.google.com/thumbnail?id=12AnI6Ej1KUAzPgpvm8LouLQ6gjFEVrU8", "https://drive.google.com/thumbnail?id=1JHMVsUPGbFWUqeIzjinUmYPb4I-7wQKa", "https://drive.google.com/thumbnail?id=1pLKmQLuwMFaCjvNEvMXs_i4er_cMZGMa"] },
+            { year: 2021, quote: "Every new day is another chance to change your life. 🌅", images: ["https://drive.google.com/thumbnail?id=1pLKmQLuwMFaCjvNEvMXs_i4er_cMZGMa", "https://drive.google.com/thumbnail?id=1AqLhDUGq9_-wS3wvzTmLBmgit2PUz-gB", "https://drive.google.com/thumbnail?id=1VBDWAaGA4Mb-7hSU6WgyQVgFPHw_thcs", "https://drive.google.com/thumbnail?id=1_iqaGWJ4Wm7Cp6moaMex9KmN7WNhvXiy", "https://drive.google.com/thumbnail?id=1wzbXq0hVyQ5j-ky4IMYIlofgrXP3cpnS", "https://drive.google.com/thumbnail?id=17ljKGQpgq3HWswNXTXLFowoGJ__P_bQy", "https://drive.google.com/thumbnail?id=1mPt7X20wy2xifiG2RDID1514xQvJ5lGb", "https://drive.google.com/thumbnail?id=1u6tZdk8EfrPGehULWT_kCpaPbil7m2-f", "https://drive.google.com/thumbnail?id=1mCwo5B6hZIrMxfcwcqBWwlSLtjGxvu4z", "https://drive.google.com/thumbnail?id=1TtnQp9pUfLhQXyFogy3bEbUQus_HSlEl", "https://drive.google.com/thumbnail?id=1fvC8gCgxndYC-YubhpJbPo-k2c3yLOdc"] },
+            { year: 2022, quote: "To live is the rarest thing in the world. 🍃", images: ["https://drive.google.com/thumbnail?id=1fPYWtl5liUz1FxCyzS5anCaYP8Pvy5br", "https://drive.google.com/thumbnail?id=1ylzYokpeexLjU32GDfpw4XbSdVg1hV-Q", "https://drive.google.com/thumbnail?id=1F4zB2eyyrM4xBFq90iKt0jjEYRLYc9po", "https://drive.google.com/thumbnail?id=113T9YJG0S-revt1BQpM6LFEXHpFCH2yg", "https://drive.google.com/thumbnail?id=1omqNFVi87acrtl7S0n9_VcLFZ85vGr8z", "https://drive.google.com/thumbnail?id=1ZOvNCpR8HVqvBJCrJdzoggfPPJThKAyX", "https://drive.google.com/thumbnail?id=1uF-ZIvmDkRy3rH0GfdSivEhAkastkKp0"] },
+            { year: 2023, quote: "This is the year of SSC exam 😊", images: ["https://drive.google.com/thumbnail?id=1pIAezKCKRj8jPMGu1BCosUWXuDr-RbvZ", "https://drive.google.com/thumbnail?id=1rftUfiKn8w8DtvpttxO8OphhOb_vZT5W", "https://drive.google.com/thumbnail?id=1z8z-ft0xJonT3RaNW-0A4aWHai2Vz5_W", "https://drive.google.com/thumbnail?id=1eXe1npKmA6-3bt_ukYdUgi5wscGCUFWP", "https://drive.google.com/thumbnail?id=1G6H8VPNlRK1VAQ-WkShQtE_MMIf2B0UB", "https://drive.google.com/thumbnail?id=1x31wcHgoCwYhY7p-nMAJimNmtJg1Iv76", "https://drive.google.com/thumbnail?id=1646vp-5XEsSFD2EMbll-erj6AnUUMaBF", "https://drive.google.com/thumbnail?id=1UI74w5p4vLRR-54SyeseYrhtf3nZ3PWS", "https://drive.google.com/thumbnail?id=1YUvUgfjCIl4HJZhSQg5L61BKg1wjFlU_", "https://drive.google.com/thumbnail?id=1YeXAzz2r5Gq98ghVIc29_s3WAlodvF0j", "https://drive.google.com/thumbnail?id=1LsVFMG1I98FQhoWGqb-n826-VO2U88aj", "https://drive.google.com/thumbnail?id=1R9O6r5b8kJYCNEda5idCCBqPqw5FxXb6", "https://drive.google.com/thumbnail?id=1ZnGdiqXDkNG216lGq-VYkgDNfkQg2pyD"] },
+            { year: 2024, quote: "Year of confusion. 😵", images: ["https://drive.google.com/thumbnail?id=1A2ncLy2MF4e3rrr5pdXhbxXah-TIdWH7", "https://drive.google.com/thumbnail?id=1HuVNlVRsl3en6aiN7QUCaKk4UQWlvRGn", "https://drive.google.com/thumbnail?id=1g9are7yFzsAqJpqfBhjC6LjuYLtKz74-", "https://drive.google.com/thumbnail?id=1J8r6DrK8jLmzaTWEhQ4uFgQhWSllNNmf", "https://drive.google.com/thumbnail?id=15IP5GNUzoj2aj1smqVG9ukXk39K1BLLY", "https://drive.google.com/thumbnail?id=1f-_T1bJvn44dUL0pgTUaQelT7FKgbxl4", "https://drive.google.com/thumbnail?id=1Yib1j5us1IK-9M-l-coe85kkapGzfsLu", "https://drive.google.com/thumbnail?id=1fUEBhBRuP3ED0TnCH5IfHsJ12d05Eeta", "https://drive.google.com/thumbnail?id=14bOfgAKmD7DhQyXetebnucjQX_BygM1u", "https://drive.google.com/thumbnail?id=10lQwtbCvnRVt-LL4SeC2Sz9BEWKkubkE", "https://drive.google.com/thumbnail?id=1T_n5OE9doNGZBLeVPMnu_v6E3clYQdoN", "https://drive.google.com/thumbnail?id=1AyIQ52SFGSrJlyzyJQ_kl7hnhvZZ18tg"] },
+            { year: 2025, quote: "Toughest Year of Life; HSC exam.😣", images: ["https://drive.google.com/thumbnail?id=1IWUsW9xkR-8eVFOmZZFazibH8KEBksrO", "https://drive.google.com/thumbnail?id=1Qqn8-IZqzyCvd1DwTx6l5j7Mq1n6WHaL", "https://drive.google.com/thumbnail?id=1i-fmu77FvCo3vUQVtmmTbi_EJQIzam09", "https://drive.google.com/thumbnail?id=11FGNwvajxEKVBgdRwOdS8yCAuXngLQ7f", "https://drive.google.com/thumbnail?id=1kW6gzIzbXnEgsknyfmBA7kKQs_nuMWxP", "https://drive.google.com/thumbnail?id=1ARSJMxD_TQvuRtrd_L4AFXZvhNS1LeXB", "https://drive.google.com/thumbnail?id=15AMGpg5jvAPtoNUmigUrAUQjugLeCndh", "https://drive.google.com/thumbnail?id=1M4B-rQ0e-HNH-nYaZduqF5Xiie1bJupJ", "https://drive.google.com/thumbnail?id=154fNB9X10jUJkOEcDvb2y7Rv8t64John", "https://drive.google.com/thumbnail?id=1cYGwAnWIrQ_6cnzV5M6-VKAHr7LVEdCV", "https://drive.google.com/thumbnail?id=1HWpjEBF9Gmg1rG5DEg_X6EwXcng8wXBv", "https://drive.google.com/thumbnail?id=10Ehoe1kyLrKYp5tEIuV9ETKEKmGL5bQU", "https://drive.google.com/thumbnail?id=1bDKMEt4LAXcoDixfQgOAQF-8CWizb35I"] },
+            { year: 2026, quote: "Year of Happiness.🥰", images: ["https://drive.google.com/thumbnail?id=1tNAVqyA38_iLD5bO6bQq710Ta8AA2MOG", "https://drive.google.com/thumbnail?id=18kXnT_Xybz9SIyfPWPDX8Sgr14bRM0oz"] }
+        ];
+        
+        const container = document.getElementById('timeline-container');
+        const yearSelect = document.getElementById('year-select');
+        
+        timelineData.forEach((data, index) => {
+            const isLeft = index % 2 === 0;
+            const option = document.createElement('option');
+            option.value = data.year;
+            option.textContent = `⭐ Year ${data.year}`;
+            yearSelect.appendChild(option);
+            
+            let imagesHtml = '';
+            if(data.text) {
+                imagesHtml = `<p class="text-2xl font-bold text-amber-300 mt-4 text-center">${data.text}</p>`;
+            } else {
+                imagesHtml = `<div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+                    ${data.images.map(img => `<img src="${img}" class="img-thumb w-full h-36 md:h-48 object-cover rounded-xl shadow-md transition-all" onclick="openLightbox('${img}')" alt="Memory">`).join('')}
+                </div>`;
+            }
+            const cardHtml = `
+                <div class="timeline-row flex w-full my-12 relative ${isLeft ? 'flex-row' : 'flex-row-reverse'}" id="year-${data.year}" data-year="${data.year}">
+                    <div class="timeline-dot absolute left-1/2 top-10 transform -translate-x-1/2 w-6 h-6 bg-amber-400 rounded-full border-4 border-[#1f2a36] z-20 shadow-[0_0_15px_#f9b43a]"></div>
+                    <div class="timeline-content w-[45%] ${isLeft ? 'pr-8 text-right' : 'pl-8 text-left'}">
+                        <div class="timeline-card p-6 md:p-8">
+                            <h2 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r ${isLeft ? 'from-amber-300 to-yellow-500' : 'from-orange-300 to-amber-400'} mb-2">${data.year}</h2>
+                            <p class="text-sm md:text-base text-gray-200 italic border-l-2 border-amber-400 pl-3">"${data.quote}"</p>
+                            ${imagesHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML += cardHtml;
+        });
+        
+        // Custom cursor logic
+        const cursor = document.getElementById('custom-cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+        document.querySelectorAll('button, a, select, .img-thumb').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.style.transform = 'translate(-50%, -50%) scale(2)');
+            el.addEventListener('mouseleave', () => cursor.style.transform = 'translate(-50%, -50%) scale(1)');
+        });
+        
+        // Loader & music
+        const loader = document.getElementById('loader');
+        const startBtn = document.getElementById('start-btn');
+        const bgMusic = document.getElementById('bg-music');
+        const musicToggle = document.getElementById('music-toggle');
+        let isMusicPlaying = false;
+        
+        startBtn.addEventListener('click', () => {
+            gsap.to(loader, { opacity: 0, duration: 0.7, onComplete: () => { loader.style.display = 'none'; cursor.style.display = 'block'; gsap.to(cursor, { opacity: 1, duration: 0.3 }); } });
+            bgMusic.play().then(() => { isMusicPlaying = true; musicToggle.innerHTML = '<i class="fas fa-volume-up text-xl text-amber-300"></i>'; }).catch(e=>console.log);
+            initScrollAnimations();
+        });
+        
+        musicToggle.addEventListener('click', () => {
+            if (isMusicPlaying) { bgMusic.pause(); musicToggle.innerHTML = '<i class="fas fa-volume-mute text-xl text-gray-400"></i>'; } 
+            else { bgMusic.play(); musicToggle.innerHTML = '<i class="fas fa-volume-up text-xl text-amber-300"></i>'; }
+            isMusicPlaying = !isMusicPlaying;
+        });
+        
+        yearSelect.addEventListener('change', (e) => {
+            if(e.target.value) {
+                const target = document.getElementById(`year-${e.target.value}`);
+                if(target) window.scrollTo({ top: target.offsetTop - 100, behavior: 'smooth' });
+            }
+        });
+        
+        // progress bar
+        const progressBar = document.getElementById('progress-bar');
+        const progressIndicator = document.getElementById('progress-indicator');
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            progressBar.style.width = scrolled + "%";
+            progressIndicator.style.right = (100 - scrolled) + "%";
+            let currentYearText = "✨ Start";
+            document.querySelectorAll('.timeline-row').forEach(row => {
+                const rect = row.getBoundingClientRect();
+                if(rect.top >= 0 && rect.top <= window.innerHeight / 2) currentYearText = row.getAttribute('data-year');
+            });
+            if(currentYearText !== "✨ Start") progressIndicator.innerText = "🌀 Voyage: " + currentYearText;
+        });
+        
+        window.openLightbox = (src) => {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox').classList.remove('hidden');
+        };
+        document.getElementById('close-lightbox').addEventListener('click', () => document.getElementById('lightbox').classList.add('hidden'));
+        document.getElementById('lightbox').addEventListener('click', (e) => { if(e.target === document.getElementById('lightbox')) document.getElementById('lightbox').classList.add('hidden'); });
+        
+        function initScrollAnimations() {
+            gsap.utils.toArray('.timeline-row').forEach((row, i) => {
+                const card = row.querySelector('.timeline-card');
+                const isLeft = i % 2 === 0;
+                gsap.from(card, { scrollTrigger: { trigger: row, start: "top 85%", toggleActions: "play none none reverse" }, x: isLeft ? -80 : 80, opacity: 0, duration: 0.9, ease: "back.out(1.2)" });
+            });
+        }
+    </script>
+</body>
+</html>
